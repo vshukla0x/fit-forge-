@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitForge — Your AI-Powered Training Coach</title>
+  <meta name="description" content="FitForge gives you precision training plans, exact sets & reps, personalized nutrition macros, and AI-driven coaching — all in one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="page-wrapper">
+    <div class="phone-frame">
+      <div class="phone-screen">
+
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="currentColor" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="currentColor" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="currentColor"/></svg>
+            <svg width="16" height="12" viewBox="0 0 24 12" fill="none"><path d="M1 4.5C4.5 1 9.5 1 12 4.5C14.5 8 19.5 8 23 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="8" r="2" fill="currentColor"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="currentColor"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="1.5" y="2.5" width="17" height="7" rx="1.5" fill="currentColor"/><rect x="23" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.5"/></svg>
+          </div>
+        </div>
+
+        <!-- ═══ REST TIMER ═══ -->
+        <div class="rest-timer-overlay" id="rest-timer-overlay" style="display:none;opacity:1">
+          <div class="rest-timer-card">
+            <p class="rest-timer-title">Rest</p>
+            <div class="rest-circle-wrap">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r="42" fill="none" stroke="var(--border)" stroke-width="6"/>
+                <circle cx="55" cy="55" r="42" fill="none" stroke="url(#rest-grad)" stroke-width="6"
+                  id="rest-circle" stroke-linecap="round" transform="rotate(-90 55 55)"
+                  style="stroke-dasharray:263.9;stroke-dashoffset:0;transition:stroke-dashoffset 0.95s linear"/>
+                <defs><linearGradient id="rest-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#F59E0B"/>
+                </linearGradient></defs>
+              </svg>
+              <div class="rest-count-wrap"><span id="rest-count" class="rest-count">60</span><span class="rest-count-label">seconds</span></div>
+            </div>
+            <p class="rest-next-label" id="rest-next-label">Next set loading...</p>
+            <div class="rest-actions">
+              <button class="rest-add-btn" onclick="addRestTime(30)">+30s</button>
+              <button class="rest-skip-btn" onclick="skipRest()">Skip →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ WORKOUT ACTIVE BAR ═══ -->
+        <div class="workout-active-bar" id="workout-active-bar" style="display:none">
+          <div class="wab-left">
+            <span class="wab-dot"></span>
+            <span class="wab-label">Workout Active</span>
+          </div>
+          <span class="wab-timer" id="active-workout-time">00:00</span>
+          <button class="wab-btn" onclick="showWorkoutComplete()">Finish</button>
+        </div>
+
+        <!-- ═══ WORKOUT COMPLETE MODAL ═══ -->
+        <div class="modal-overlay" id="workout-complete-modal">
+          <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="wc-emoji">🎉</div>
+            <h2 class="wc-title">Workout Complete!</h2>
+            <p class="wc-sub">Amazing session. Here's your summary:</p>
+            <div class="wc-stats-grid">
+              <div class="wc-stat"><span class="wcs-val" id="wc-duration">–</span><span class="wcs-lbl">Duration</span></div>
+              <div class="wc-stat"><span class="wcs-val" id="wc-sets">–</span><span class="wcs-lbl">Sets Done</span></div>
+              <div class="wc-stat"><span class="wcs-val" id="wc-volume">–</span><span class="wcs-lbl">Volume</span></div>
+              <div class="wc-stat"><span class="wcs-val" id="wc-calories">–</span><span class="wcs-lbl">Burned</span></div>
+            </div>
+            <button class="cta-button" style="margin-top:4px" onclick="closeWorkoutComplete()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              Back to Home
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ FOOD LOG MODAL ═══ -->
+        <div class="modal-overlay" id="food-log-modal">
+          <div class="modal-sheet food-modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="food-modal-header">
+              <h2 class="food-modal-title">Log Food</h2>
+              <button class="video-close-btn" onclick="closeFoodLog()" aria-label="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              </button>
+            </div>
+            <div class="food-search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);fill:var(--text-muted)"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              <input type="text" class="food-search-input" id="food-search-input"
+                placeholder="Search foods..." oninput="onFoodSearch(this.value)" autocomplete="off">
+            </div>
+            <div class="food-results-list" id="food-results-list"></div>
+          </div>
+        </div>
+
+        <!-- ═══ WEIGHT LOG MODAL ═══ -->
+        <div class="modal-overlay" id="weight-log-modal">
+          <div class="modal-sheet" style="max-height:320px">
+            <div class="modal-handle"></div>
+            <h2 class="food-modal-title" style="margin-bottom:16px">Log Today's Weight</h2>
+            <div class="weight-input-wrap">
+              <input type="number" id="weight-input" class="weight-input" min="20" max="400" step="0.1" placeholder="82.5">
+              <span class="weight-unit">kg</span>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px">Weigh yourself in the morning, after bathroom, before eating.</p>
+            <button class="cta-button" onclick="logWeight()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              Save Weight
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ VIDEO MODAL OVERLAY ═══ -->
+        <div class="video-modal" id="video-modal" onclick="closeVideo(event)">
+          <div class="video-modal-inner">
+            <div class="video-modal-header">
+              <div class="video-modal-meta">
+                <span class="video-modal-label" id="video-modal-label">Barbell Bench Press</span>
+                <span class="tag purple small">Form Guide</span>
+              </div>
+              <button class="video-close-btn" onclick="closeVideo()" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              </button>
+            </div>
+            <div class="video-frame-wrap">
+              <iframe id="video-iframe" class="video-iframe" src="" title="Exercise form guide"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen loading="lazy"></iframe>
+              <div class="video-loading-state" id="video-loading">
+                <div class="video-spinner"></div>
+                <p>Loading video...</p>
+              </div>
+            </div>
+            <div class="video-modal-tips" id="video-modal-tips">
+              <!-- populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ ALL PAGES ═══ -->
+        <div class="screen-router">
+
+          <!-- ============================================================
+               PAGE 0 — LOGIN
+          ============================================================ -->
+          <div class="screen active" id="screen-login">
+            <div class="login-page">
+              <div class="login-top">
+                <div class="login-logo">
+                  <div class="logo-mark">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <path d="M14 2L4 8V20L14 26L24 20V8L14 2Z" fill="url(#logo-g)" opacity="0.9"/>
+                      <path d="M9 14L13 18L20 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <defs><linearGradient id="logo-g" x1="4" y1="2" x2="24" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#A78BFA"/><stop offset="1" stop-color="#F59E0B"/></linearGradient></defs>
+                    </svg>
+                  </div>
+                  <span class="logo-text">FitForge</span>
+                </div>
+
+                <div class="login-hero-text">
+                  <h1 class="login-headline">Your AI<br/>Coach is<br/>Ready.</h1>
+                  <p class="login-sub">Precision training. Exact nutrition.<br/>Built for your body.</p>
+                </div>
+
+                <div class="login-pills">
+                  <div class="pill-row">
+                    <span class="feature-pill">🏋️ Exact sets & reps</span>
+                    <span class="feature-pill">🥗 Macro ranges</span>
+                  </div>
+                  <div class="pill-row">
+                    <span class="feature-pill">🤖 AI Coach</span>
+                    <span class="feature-pill">📈 Progress tracking</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="login-bottom">
+                <p class="login-prompt">Continue with</p>
+
+                <div class="login-name-wrap">
+                  <input type="text" id="login-name-input" class="login-name-input" placeholder="Your name" maxlength="30" autocomplete="name">
+                </div>
+
+                <button class="social-btn google-btn" id="google-login-btn" onclick="loginWithGoogle(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                  Continue with Google
+                </button>
+
+                <button class="social-btn whatsapp-btn" id="whatsapp-login-btn" onclick="loginWithWhatsApp(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Continue with WhatsApp
+                </button>
+
+                <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               PAGE 1 — ONBOARDING: HEIGHT & WEIGHT
+          ============================================================ -->
+          <div class="screen" id="screen-onboard-stats">
+            <div class="scroll-area">
+              <div class="onboard-header">
+                <div class="onboard-step-indicator">
+                  <div class="step-dot active"></div>
+                  <div class="step-line"></div>
+                  <div class="step-dot"></div>
+                  <div class="step-line"></div>
+                  <div class="step-dot"></div>
+                </div>
+                <h1 class="onboard-title">Your body,<br/>your baseline.</h1>
+                <p class="onboard-sub">Just three things — we'll handle the rest.</p>
+              </div>
+
+              <!-- Height -->
+              <div class="stat-input-card" id="height-card">
+                <div class="stat-input-label">
+                  <span class="stat-input-icon">📏</span>
+                  <span class="stat-input-name">Height</span>
+                </div>
+                <div class="slider-value-display">
+                  <span class="slider-big-val" id="height-display">175</span>
+                  <span class="slider-unit">cm</span>
+                </div>
+                <div class="slider-track-wrap">
+                  <input type="range" class="custom-slider" id="height-slider"
+                    min="140" max="220" value="175" oninput="updateSlider('height')" />
+                  <div class="slider-ticks">
+                    <span>140</span><span>160</span><span>180</span><span>200</span><span>220</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Weight -->
+              <div class="stat-input-card" id="weight-card">
+                <div class="stat-input-label">
+                  <span class="stat-input-icon">⚖️</span>
+                  <span class="stat-input-name">Weight</span>
+                </div>
+                <div class="slider-value-display">
+                  <span class="slider-big-val" id="weight-display">80</span>
+                  <span class="slider-unit">kg</span>
+                </div>
+                <div class="slider-track-wrap">
+                  <input type="range" class="custom-slider" id="weight-slider"
+                    min="40" max="160" value="80" oninput="updateSlider('weight')" />
+                  <div class="slider-ticks">
+                    <span>40</span><span>70</span><span>100</span><span>130</span><span>160</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BMI Preview -->
+              <div class="bmi-preview-card" id="bmi-card">
+                <div class="bmi-icon">📊</div>
+                <div class="bmi-info">
+                  <p class="bmi-label">Estimated BMI</p>
+                  <p class="bmi-val" id="bmi-display">26.1 <span class="bmi-category" id="bmi-cat">Normal</span></p>
+                </div>
+              </div>
+
+              <button class="cta-button" onclick="goToBodyFat()" style="margin-top:8px">
+                Next — Body Fat
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+
+              <div style="height:80px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               PAGE 2 — ONBOARDING: BODY FAT (image picker)
+          ============================================================ -->
+          <div class="screen" id="screen-onboard-bodyfat">
+            <div class="scroll-area">
+              <div class="onboard-header">
+                <div class="onboard-step-indicator">
+                  <div class="step-dot done"></div>
+                  <div class="step-line done"></div>
+                  <div class="step-dot active"></div>
+                  <div class="step-line"></div>
+                  <div class="step-dot"></div>
+                </div>
+                <h1 class="onboard-title">Estimate your<br/>body fat.</h1>
+                <p class="onboard-sub">Tap the image that looks most like you right now.</p>
+              </div>
+
+              <div class="bodyfat-grid">
+
+                <div class="bf-option" data-bf="28" onclick="selectBodyFat(this, 28, 'High', '#F87171')">
+                  <div class="bf-figure bf-high">
+                    <div class="bf-silhouette-wrap">
+                      <!-- SVG Body Silhouette — High BF -->
+                      <svg viewBox="0 0 60 120" class="bf-svg">
+                        <ellipse cx="30" cy="20" rx="14" ry="14" fill="currentColor" opacity="0.85"/>
+                        <path d="M12 45 Q8 35 16 32 Q22 28 30 28 Q38 28 44 32 Q52 35 48 45 L50 90 Q50 96 44 96 L36 96 L34 115 Q34 119 30 119 Q26 119 26 115 L24 96 L16 96 Q10 96 10 90 Z" fill="currentColor" opacity="0.8"/>
+                        <ellipse cx="30" cy="58" rx="20" ry="8" fill="currentColor" opacity="0.15"/>
+                      </svg>
+                    </div>
+                    <div class="bf-zone-bar" style="background:#F87171"></div>
+                  </div>
+                  <div class="bf-label">
+                    <span class="bf-pct">25%+</span>
+                    <span class="bf-desc">High fat</span>
+                  </div>
+                </div>
+
+                <div class="bf-option" data-bf="20" onclick="selectBodyFat(this, 20, 'Above avg', '#F59E0B')">
+                  <div class="bf-figure bf-above-avg">
+                    <div class="bf-silhouette-wrap">
+                      <svg viewBox="0 0 60 120" class="bf-svg">
+                        <ellipse cx="30" cy="20" rx="13" ry="13" fill="currentColor" opacity="0.85"/>
+                        <path d="M13 44 Q10 35 17 32 Q23 29 30 29 Q37 29 43 32 Q50 35 47 44 L48 88 Q48 94 43 94 L36 94 L34 114 Q34 118 30 118 Q26 118 26 114 L24 94 L17 94 Q12 94 12 88 Z" fill="currentColor" opacity="0.8"/>
+                      </svg>
+                    </div>
+                    <div class="bf-zone-bar" style="background:#F59E0B"></div>
+                  </div>
+                  <div class="bf-label">
+                    <span class="bf-pct">20%</span>
+                    <span class="bf-desc">Soft</span>
+                  </div>
+                </div>
+
+                <div class="bf-option" data-bf="15" onclick="selectBodyFat(this, 15, 'Athletic', '#34D399')">
+                  <div class="bf-figure bf-athletic">
+                    <div class="bf-silhouette-wrap">
+                      <svg viewBox="0 0 60 120" class="bf-svg">
+                        <ellipse cx="30" cy="19" rx="12" ry="12" fill="currentColor" opacity="0.9"/>
+                        <path d="M16 43 Q13 35 18 32 Q24 29 30 29 Q36 29 42 32 Q47 35 44 43 L45 87 Q45 92 41 92 L35 92 L33 113 Q33 117 30 117 Q27 117 27 113 L25 92 L19 92 Q15 92 15 87 Z" fill="currentColor" opacity="0.85"/>
+                        <!-- muscle lines -->
+                        <line x1="27" y1="52" x2="27" y2="70" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="33" y1="52" x2="33" y2="70" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <path d="M22 55 Q30 52 38 55" stroke="currentColor" stroke-width="1" fill="none" opacity="0.3"/>
+                      </svg>
+                    </div>
+                    <div class="bf-zone-bar" style="background:#34D399"></div>
+                  </div>
+                  <div class="bf-label">
+                    <span class="bf-pct">15%</span>
+                    <span class="bf-desc">Athletic</span>
+                  </div>
+                </div>
+
+                <div class="bf-option" data-bf="10" onclick="selectBodyFat(this, 10, 'Lean', '#60A5FA')">
+                  <div class="bf-figure bf-lean">
+                    <div class="bf-silhouette-wrap">
+                      <svg viewBox="0 0 60 120" class="bf-svg">
+                        <ellipse cx="30" cy="18" rx="11" ry="11" fill="currentColor" opacity="0.9"/>
+                        <path d="M18 42 Q15 34 19 31 Q24 28 30 28 Q36 28 41 31 Q45 34 42 42 L43 86 Q43 91 40 91 L35 91 L33 112 Q33 116 30 116 Q27 116 27 112 L25 91 L20 91 Q17 91 17 86 Z" fill="currentColor" opacity="0.9"/>
+                        <!-- stronger muscle lines -->
+                        <line x1="27" y1="50" x2="27" y2="72" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+                        <line x1="33" y1="50" x2="33" y2="72" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+                        <path d="M22 53 Q30 49 38 53" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.4"/>
+                        <path d="M22 62 Q30 58 38 62" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.4"/>
+                      </svg>
+                    </div>
+                    <div class="bf-zone-bar" style="background:#60A5FA"></div>
+                  </div>
+                  <div class="bf-label">
+                    <span class="bf-pct">10%</span>
+                    <span class="bf-desc">Lean</span>
+                  </div>
+                </div>
+
+                <div class="bf-option" data-bf="6" onclick="selectBodyFat(this, 6, 'Stage-ready', '#A78BFA')">
+                  <div class="bf-figure bf-shredded">
+                    <div class="bf-silhouette-wrap">
+                      <svg viewBox="0 0 60 120" class="bf-svg">
+                        <ellipse cx="30" cy="17" rx="10" ry="10" fill="currentColor" opacity="0.95"/>
+                        <path d="M19 41 Q17 33 20 30 Q25 27 30 27 Q35 27 40 30 Q43 33 41 41 L42 85 Q42 89 39 89 L35 89 L33 111 Q33 115 30 115 Q27 115 27 111 L25 89 L21 89 Q18 89 18 85 Z" fill="currentColor" opacity="0.95"/>
+                        <!-- max muscle lines -->
+                        <line x1="27" y1="48" x2="27" y2="68" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+                        <line x1="33" y1="48" x2="33" y2="68" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+                        <path d="M22 51 Q30 47 38 51" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                        <path d="M22 59 Q30 55 38 59" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                        <path d="M22 67 Q30 63 38 67" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                        <!-- chest lines -->
+                        <path d="M20 40 Q26 37 30 38 Q34 37 40 40" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.45"/>
+                      </svg>
+                    </div>
+                    <div class="bf-zone-bar" style="background:#A78BFA"></div>
+                  </div>
+                  <div class="bf-label">
+                    <span class="bf-pct">6%</span>
+                    <span class="bf-desc">Stage-ready</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Selected BF display -->
+              <div class="bf-selected-display" id="bf-selected-display" style="display:none">
+                <div class="bf-selected-inner">
+                  <span class="bf-sel-label">You selected</span>
+                  <span class="bf-sel-val" id="bf-sel-val">~15% body fat</span>
+                  <span class="bf-sel-tag" id="bf-sel-tag">Athletic</span>
+                </div>
+              </div>
+
+              <button class="cta-button" id="bf-next-btn" onclick="goToGoal()" style="margin-top:12px; opacity:0.4; pointer-events:none;">
+                Next — Set Goal
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+
+              <div style="height:80px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               PAGE 3 — ONBOARDING: GOAL
+          ============================================================ -->
+          <div class="screen" id="screen-onboard-goal">
+            <div class="scroll-area">
+              <div class="onboard-header">
+                <div class="onboard-step-indicator">
+                  <div class="step-dot done"></div>
+                  <div class="step-line done"></div>
+                  <div class="step-dot done"></div>
+                  <div class="step-line done"></div>
+                  <div class="step-dot active"></div>
+                </div>
+                <h1 class="onboard-title">What's your<br/>main goal?</h1>
+                <p class="onboard-sub">This shapes your training style, sets, reps, and macros.</p>
+              </div>
+
+              <div class="goal-options">
+                <div class="goal-card" id="goal-muscle" onclick="selectGoal(this, 'muscle')">
+                  <div class="goal-icon" style="background:linear-gradient(135deg,#A78BFA,#7C3AED)">💪</div>
+                  <div class="goal-content">
+                    <h3 class="goal-title">Build Muscle</h3>
+                    <p class="goal-desc">Hypertrophy training · 6–12 reps · Calorie surplus</p>
+                  </div>
+                  <div class="goal-check"></div>
+                </div>
+
+                <div class="goal-card" id="goal-fat" onclick="selectGoal(this, 'fat')">
+                  <div class="goal-icon" style="background:linear-gradient(135deg,#F59E0B,#D97706)">🔥</div>
+                  <div class="goal-content">
+                    <h3 class="goal-title">Lose Fat</h3>
+                    <p class="goal-desc">Strength + cardio · 12–15 reps · Calorie deficit</p>
+                  </div>
+                  <div class="goal-check"></div>
+                </div>
+
+                <div class="goal-card" id="goal-strength" onclick="selectGoal(this, 'strength')">
+                  <div class="goal-icon" style="background:linear-gradient(135deg,#60A5FA,#2563EB)">🏆</div>
+                  <div class="goal-content">
+                    <h3 class="goal-title">Get Stronger</h3>
+                    <p class="goal-desc">Powerlifting style · 1–5 reps · Maintenance cals</p>
+                  </div>
+                  <div class="goal-check"></div>
+                </div>
+
+                <div class="goal-card" id="goal-recomp" onclick="selectGoal(this, 'recomp')">
+                  <div class="goal-icon" style="background:linear-gradient(135deg,#34D399,#059669)">⚡</div>
+                  <div class="goal-content">
+                    <h3 class="goal-title">Body Recomposition</h3>
+                    <p class="goal-desc">Lose fat & gain muscle · 8–15 reps · Maintenance</p>
+                  </div>
+                  <div class="goal-check"></div>
+                </div>
+              </div>
+
+              <button class="cta-button" id="goal-next-btn" onclick="enterApp()" style="margin-top:4px;opacity:0.4;pointer-events:none">
+                🚀 Build My Plan
+              </button>
+
+              <div style="height:80px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               SCREEN — HOME / DASHBOARD
+          ============================================================ -->
+          <div class="screen" id="screen-home">
+            <div class="scroll-area">
+
+              <!-- Header -->
+              <div class="home-header">
+                <div class="home-header-left">
+                  <p class="greeting-sub greeting-label">Good morning 🔥</p>
+                  <h1 class="greeting-name">Alex</h1>
+                </div>
+                <div class="header-actions">
+                  <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3zm-1-5h2v3h-2zm0 13h2v3h-2zm-7-7h3v2H4zm13 0h3v2h-3zM6.34 7.76l1.42-1.42 2.12 2.12-1.42 1.42zM14.12 15.54l1.42-1.42 2.12 2.12-1.42 1.42zM6.34 16.24l2.12-2.12 1.42 1.42-2.12 2.12zM14.12 8.46l2.12-2.12 1.42 1.42-2.12 2.12z"/></svg>
+                    <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                  </button>
+                  <button class="avatar-btn" id="avatar-btn" aria-label="Profile">
+                    <img src="https://api.dicebear.com/8.x/notionists/svg?seed=Alex&backgroundColor=b6e3f4" alt="Avatar" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Water Tracking (home) -->
+              <div class="water-home-card">
+                <div class="water-home-left">
+                  <span class="water-home-icon">💧</span>
+                  <div>
+                    <p class="water-home-title">Hydration</p>
+                    <p class="water-amount" style="font-size:18px;font-weight:800;color:var(--text-primary)">0ml</p>
+                    <p class="water-goal-text" style="font-size:11px;color:var(--text-muted)">/ 2.9L daily goal</p>
+                  </div>
+                </div>
+                <div class="water-home-right">
+                  <div class="water-bar-track vertical" id="water-bar-home">
+                    <div class="water-bar-fill water-bar-fill-v" id="water-bar-fill"></div>
+                  </div>
+                  <button class="water-quick-btn" onclick="addWater(250)">+250ml</button>
+                </div>
+              </div>
+
+              <!-- Streak Banner -->
+              <div class="streak-banner">
+                <div class="streak-item">
+                  <span class="streak-icon">🔥</span>
+                  <div>
+                    <p class="streak-num">14</p>
+                    <p class="streak-label">Day Streak</p>
+                  </div>
+                </div>
+                <div class="streak-divider"></div>
+                <div class="streak-item">
+                  <span class="streak-icon">⚡</span>
+                  <div>
+                    <p class="streak-num">78%</p>
+                    <p class="streak-label">Week Goal</p>
+                  </div>
+                </div>
+                <div class="streak-divider"></div>
+                <div class="streak-item">
+                  <span class="streak-icon">💪</span>
+                  <div>
+                    <p class="streak-num">3,240</p>
+                    <p class="streak-label">kcal burned</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Today's Workout Card -->
+              <div class="section-header">
+                <h2 class="section-title">Today's Plan</h2>
+                <button class="see-all-btn" onclick="switchScreen('screen-training')">See all →</button>
+              </div>
+
+              <div class="workout-card primary-card" onclick="switchScreen('screen-training')">
+                <div class="workout-card-top">
+                  <div class="workout-badge">Day 3 · Push</div>
+                  <div class="workout-intensity high">Hard</div>
+                </div>
+                <h3 class="workout-title">Upper Body Hypertrophy</h3>
+                <p class="workout-meta">8 exercises · ~65 min · Chest, Shoulders, Triceps</p>
+                <div class="workout-progress-bar">
+                  <div class="workout-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="workout-footer">
+                  <span class="workout-footer-text">Not started</span>
+                  <button class="start-btn" onclick="event.stopPropagation(); switchScreen('screen-training')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Start
+                  </button>
+                </div>
+              </div>
+
+              <!-- AI Coach Nudge -->
+              <div class="ai-nudge-card" onclick="switchScreen('screen-ai')">
+                <div class="ai-nudge-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="url(#g1)" stroke-width="2"/><path d="M8 12s1-2 4-2 4 2 4 2" stroke="url(#g1)" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="1" fill="url(#g1)"/><circle cx="15" cy="9" r="1" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#A78BFA"/><stop offset="1" stop-color="#F59E0B"/></linearGradient></defs></svg>
+                </div>
+                <div class="ai-nudge-text">
+                  <p class="ai-nudge-title">AI Coach insight</p>
+                  <p class="ai-nudge-body">Increase bench press to 80kg today — you're ready.</p>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </div>
+
+              <!-- Nutrition Ring (compact) -->
+              <div class="section-header">
+                <h2 class="section-title">Nutrition Today</h2>
+                <button class="see-all-btn" onclick="switchScreen('screen-nutrition')">Details →</button>
+              </div>
+
+              <div class="nutrition-card" onclick="switchScreen('screen-nutrition')">
+                <div class="nutrition-ring-wrap">
+                  <svg class="nutrition-ring" width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="var(--ring-track)" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="url(#kcal-grad)" stroke-width="10"
+                      stroke-dasharray="251.2" stroke-dashoffset="75" stroke-linecap="round"
+                      transform="rotate(-90 50 50)"/>
+                    <defs>
+                      <linearGradient id="kcal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#F59E0B"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="nutrition-ring-label">
+                    <p class="ring-kcal">1,840</p>
+                    <p class="ring-unit">kcal</p>
+                  </div>
+                </div>
+                <div class="nutrition-macros">
+                  <!-- Range bars on home card -->
+                  <div class="macro-item">
+                    <div class="macro-bar-track">
+                      <div class="macro-bar-low protein" style="width:55%"></div>
+                      <div class="macro-bar-fill protein" style="width:72%"></div>
+                    </div>
+                    <div class="macro-info">
+                      <span class="macro-name">Protein</span>
+                      <span class="macro-val">158g <span class="macro-goal">180–220g</span></span>
+                    </div>
+                  </div>
+                  <div class="macro-item">
+                    <div class="macro-bar-track">
+                      <div class="macro-bar-low carbs" style="width:40%"></div>
+                      <div class="macro-bar-fill carbs" style="width:55%"></div>
+                    </div>
+                    <div class="macro-info">
+                      <span class="macro-name">Carbs</span>
+                      <span class="macro-val">242g <span class="macro-goal">380–440g</span></span>
+                    </div>
+                  </div>
+                  <div class="macro-item">
+                    <div class="macro-bar-track">
+                      <div class="macro-bar-low fats" style="width:71%"></div>
+                      <div class="macro-bar-fill fats" style="width:80%"></div>
+                    </div>
+                    <div class="macro-info">
+                      <span class="macro-name">Fats</span>
+                      <span class="macro-val">56g <span class="macro-goal">50–70g</span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Weekly Schedule -->
+              <div class="section-header">
+                <h2 class="section-title">This Week</h2>
+              </div>
+              <div class="week-chips">
+                <div class="day-chip done"><span class="day-label">Mon</span><span class="day-icon">✓</span><span class="day-type">Pull</span></div>
+                <div class="day-chip done"><span class="day-label">Tue</span><span class="day-icon">✓</span><span class="day-type">Legs</span></div>
+                <div class="day-chip today"><span class="day-label">Wed</span><span class="day-icon">⚡</span><span class="day-type">Push</span></div>
+                <div class="day-chip"><span class="day-label">Thu</span><span class="day-icon">·</span><span class="day-type">Rest</span></div>
+                <div class="day-chip"><span class="day-label">Fri</span><span class="day-icon">·</span><span class="day-type">Pull</span></div>
+                <div class="day-chip"><span class="day-label">Sat</span><span class="day-icon">·</span><span class="day-type">Legs</span></div>
+                <div class="day-chip rest"><span class="day-label">Sun</span><span class="day-icon">🛌</span><span class="day-type">Rest</span></div>
+              </div>
+
+              <div style="height:100px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               SCREEN — TRAINING
+          ============================================================ -->
+          <div class="screen" id="screen-training">
+            <div class="scroll-area">
+              <div class="screen-topbar">
+                <h1 class="screen-title">Today's Workout</h1>
+                <div class="topbar-tags">
+                  <span class="tag orange">Push Day</span>
+                  <span class="tag purple">Hypertrophy</span>
+                </div>
+              </div>
+
+              <div class="workout-stats-strip">
+                <div class="wstat"><span class="wstat-val">8</span><span class="wstat-lbl">Exercises</span></div>
+                <div class="wstat"><span class="wstat-val">~65</span><span class="wstat-lbl">Minutes</span></div>
+                <div class="wstat"><span class="wstat-val">24</span><span class="wstat-lbl">Total Sets</span></div>
+                <div class="wstat"><span class="wstat-val">524</span><span class="wstat-lbl">kcal</span></div>
+              </div>
+
+              <!-- Workout Timer Bar -->
+              <div class="workout-timer-bar" id="workout-timer-bar">
+                <span class="wtb-label">Elapsed</span>
+                <span class="wtb-time" id="workout-timer-display">00:00</span>
+                <span class="wtb-sets" id="workout-sets-count"></span>
+              </div>
+
+              <div class="exercise-list" id="exercise-list">
+                <!-- Dynamically rendered by JS -->
+                <div class="exercise-card" id="ex-1">
+                  <div class="exercise-num">1</div>
+                  <div class="exercise-info">
+                    <div class="exercise-header">
+                      <h3 class="exercise-name">Barbell Bench Press</h3>
+                      <span class="muscle-tag">Chest · Triceps</span>
+                    </div>
+                    <div class="sets-table">
+                      <div class="set-row header-row"><span>Set</span><span>Weight</span><span>Reps</span><span>Rest</span></div>
+                      <div class="set-row"><span class="set-num">1</span><span class="set-weight">60 kg <span class="set-note">warm-up</span></span><span class="set-reps">12</span><span class="set-rest">90s</span></div>
+                      <div class="set-row"><span class="set-num">2</span><span class="set-weight">75 kg</span><span class="set-reps">8</span><span class="set-rest">120s</span></div>
+                      <div class="set-row ai-suggest"><span class="set-num">3</span><span class="set-weight">80 kg <span class="ai-badge">AI ↑</span></span><span class="set-reps">6</span><span class="set-rest">180s</span></div>
+                      <div class="set-row"><span class="set-num">4</span><span class="set-weight">75 kg</span><span class="set-reps">8</span><span class="set-rest">120s</span></div>
+                    </div>
+                    <div class="exercise-tip"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Tuck elbows 45°, full ROM, pause at chest</div>
+                    <button class="watch-form-btn" onclick="openVideo('bench','Barbell Bench Press','vthMCtgVtFw',['Retract scapula before unracking','Bar path: lower chest to mid-chest arc','Feet flat, slight arch in lower back','Touch chest — no bouncing'])">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                      Watch Form on YouTube
+                    </button>
+                  </div>
+                </div>
+
+                <div class="exercise-card">
+                  <div class="exercise-num">2</div>
+                  <div class="exercise-info">
+                    <div class="exercise-header"><h3 class="exercise-name">Incline DB Press</h3><span class="muscle-tag">Upper Chest</span></div>
+                    <div class="sets-table">
+                      <div class="set-row header-row"><span>Set</span><span>Weight</span><span>Reps</span><span>Rest</span></div>
+                      <div class="set-row"><span class="set-num">1</span><span class="set-weight">30 kg</span><span class="set-reps">10</span><span class="set-rest">90s</span></div>
+                      <div class="set-row"><span class="set-num">2</span><span class="set-weight">34 kg</span><span class="set-reps">8</span><span class="set-rest">90s</span></div>
+                      <div class="set-row"><span class="set-num">3</span><span class="set-weight">34 kg</span><span class="set-reps">8</span><span class="set-rest">90s</span></div>
+                    </div>
+                    <div class="exercise-tip"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Set at 30–45° incline. Control descent 2–3s</div>
+                    <button class="watch-form-btn" onclick="openVideo('incline','Incline Dumbbell Press','5HLW2AI2Eck',['30–45° bench angle — not higher','Neutral grip at the top, slight flare at bottom','Lower to upper chest level','Pause briefly — no bouncing off chest'])">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                      Watch Form on YouTube
+                    </button>
+                  </div>
+                </div>
+
+                <div class="exercise-card">
+                  <div class="exercise-num">3</div>
+                  <div class="exercise-info">
+                    <div class="exercise-header"><h3 class="exercise-name">Cable Lateral Raises</h3><span class="muscle-tag">Medial Delts</span></div>
+                    <div class="sets-table">
+                      <div class="set-row header-row"><span>Set</span><span>Weight</span><span>Reps</span><span>Rest</span></div>
+                      <div class="set-row"><span class="set-num">1</span><span class="set-weight">8 kg</span><span class="set-reps">15</span><span class="set-rest">60s</span></div>
+                      <div class="set-row"><span class="set-num">2</span><span class="set-weight">8 kg</span><span class="set-reps">15</span><span class="set-rest">60s</span></div>
+                      <div class="set-row"><span class="set-num">3</span><span class="set-weight">8 kg</span><span class="set-reps">12</span><span class="set-rest">60s</span></div>
+                      <div class="set-row"><span class="set-num">4</span><span class="set-weight">8 kg</span><span class="set-reps">12</span><span class="set-rest">60s</span></div>
+                    </div>
+                    <div class="exercise-tip"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Slight forward lean, lead with elbow, no shrugging</div>
+                    <button class="watch-form-btn" onclick="openVideo('lateral','Cable Lateral Raises','yzJ7l02-yh4',['Lead with your elbow — not your hand','Slight forward torso lean (10–15°)','Raise to shoulder height only','Control the descent — 2–3 seconds down'])">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                      Watch Form on YouTube
+                    </button>
+                  </div>
+                </div>
+
+                <div class="exercise-card">
+                  <div class="exercise-num">4</div>
+                  <div class="exercise-info">
+                    <div class="exercise-header"><h3 class="exercise-name">Overhead Press</h3><span class="muscle-tag">Shoulders · Traps</span></div>
+                    <div class="sets-table">
+                      <div class="set-row header-row"><span>Set</span><span>Weight</span><span>Reps</span><span>Rest</span></div>
+                      <div class="set-row"><span class="set-num">1</span><span class="set-weight">40 kg</span><span class="set-reps">10</span><span class="set-rest">120s</span></div>
+                      <div class="set-row"><span class="set-num">2</span><span class="set-weight">47.5 kg</span><span class="set-reps">8</span><span class="set-rest">120s</span></div>
+                      <div class="set-row"><span class="set-num">3</span><span class="set-weight">47.5 kg</span><span class="set-reps">6</span><span class="set-rest">120s</span></div>
+                    </div>
+                    <div class="exercise-tip"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Brace core, no arching, drive bar straight up</div>
+                    <button class="watch-form-btn" onclick="openVideo('ohp','Overhead Press','2yjwXTZQDDI',['Bar starts at collarbone level','Tuck elbows slightly — not full flare','Brace core hard — no lower back hyperextension','Push your head through at the top of the rep'])">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                      Watch Form on YouTube
+                    </button>
+                  </div>
+                </div>
+
+                <div class="exercise-card">
+                  <div class="exercise-num">5</div>
+                  <div class="exercise-info">
+                    <div class="exercise-header"><h3 class="exercise-name">Tricep Pushdowns</h3><span class="muscle-tag">Triceps</span></div>
+                    <div class="sets-table">
+                      <div class="set-row header-row"><span>Set</span><span>Weight</span><span>Reps</span><span>Rest</span></div>
+                      <div class="set-row"><span class="set-num">1</span><span class="set-weight">25 kg</span><span class="set-reps">15</span><span class="set-rest">60s</span></div>
+                      <div class="set-row"><span class="set-num">2</span><span class="set-weight">30 kg</span><span class="set-reps">12</span><span class="set-rest">60s</span></div>
+                      <div class="set-row"><span class="set-num">3</span><span class="set-weight">30 kg</span><span class="set-reps">10</span><span class="set-rest">60s</span></div>
+                    </div>
+                    <button class="watch-form-btn" onclick="openVideo('tricep','Tricep Pushdowns','vB5OHsJ3EME',['Elbows pinned to your sides — do not flare','Rope: split apart at the bottom for full contraction','Full extension at bottom — squeeze for 1 second','Slow eccentric on the way back up'])">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                      Watch Form on YouTube
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button class="cta-button" style="margin:16px 16px 8px" onclick="beginWorkout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Begin Workout
+              </button>
+              <div style="height:100px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               SCREEN — NUTRITION (with macro ranges)
+          ============================================================ -->
+          <div class="screen" id="screen-nutrition">
+            <div class="scroll-area">
+              <div class="screen-topbar">
+                <h1 class="screen-title">Nutrition</h1>
+                <div class="topbar-tags"><span class="tag green">Bulking Phase</span></div>
+              </div>
+
+              <!-- Calorie Card -->
+              <div class="calorie-target-card">
+                <div class="calorie-donut-wrap">
+                  <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="var(--ring-track)" stroke-width="14"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#cal-g)" stroke-width="14"
+                      stroke-dasharray="314.16" stroke-dashoffset="94" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                    <defs><linearGradient id="cal-g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#F59E0B"/></linearGradient></defs>
+                  </svg>
+                  <div class="donut-center"><p class="donut-val">1,840</p><p class="donut-lbl">eaten</p></div>
+                </div>
+                <div class="calorie-details" id="calorie-details-block">
+                  <div class="cal-row"><span class="cal-lbl">🎯 Target Range</span><span class="cal-val accent">3,000–3,400 kcal</span></div>
+                  <div class="cal-row"><span class="cal-lbl">✅ Consumed</span><span class="cal-val">1,840 kcal</span></div>
+                  <div class="cal-row"><span class="cal-lbl">🔥 Exercise</span><span class="cal-val green-val">−524 kcal</span></div>
+                  <div class="cal-row"><span class="cal-lbl">📊 Remaining</span><span class="cal-val orange-val">1,684–2,084</span></div>
+                </div>
+              </div>
+
+              <!-- Macro Ranges -->
+              <div class="section-header">
+                <h2 class="section-title">Macro Targets</h2>
+                <span class="tag purple small">AI Calculated</span>
+              </div>
+
+              <div class="macro-breakdown-card">
+
+                <!-- PROTEIN -->
+                <div class="macro-block protein-block">
+                  <div class="macro-block-header">
+                    <span class="macro-block-icon">🥩</span>
+                    <span class="macro-block-name">Protein</span>
+                    <span class="macro-block-badge">Priority</span>
+                  </div>
+                  <div class="macro-range-display">
+                    <div class="macro-range-current">
+                      <span class="macro-current">158g</span>
+                      <span class="macro-current-label">eaten</span>
+                    </div>
+                    <div class="macro-range-limits">
+                      <div class="range-limit-row">
+                        <span class="rl-label min-label">Min</span>
+                        <span class="rl-val">180g</span>
+                      </div>
+                      <div class="range-limit-row">
+                        <span class="rl-label max-label">Max</span>
+                        <span class="rl-val">220g</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="range-bar-wrap">
+                    <div class="range-bar-track">
+                      <div class="range-bar-zone protein-zone" style="left:0%;width:72%"></div>
+                      <div class="range-min-marker protein-min" style="left:72%"></div>
+                      <div class="range-max-marker" style="left:90%"></div>
+                      <div class="range-fill-dot protein-dot" style="left:72%"></div>
+                    </div>
+                    <div class="range-bar-labels">
+                      <span>0g</span><span style="margin-left:auto">220g</span>
+                    </div>
+                  </div>
+                  <div class="macro-status-row">
+                    <span class="macro-status-chip warn">⚠ 22g below minimum</span>
+                    <span class="macro-ratio">2.2g/kg bodyweight</span>
+                  </div>
+                  <p class="macro-tip">Eat more chicken, eggs, or Greek yogurt before dinner.</p>
+                </div>
+
+                <!-- CARBS -->
+                <div class="macro-block carbs-block">
+                  <div class="macro-block-header">
+                    <span class="macro-block-icon">🍚</span>
+                    <span class="macro-block-name">Carbohydrates</span>
+                  </div>
+                  <div class="macro-range-display">
+                    <div class="macro-range-current">
+                      <span class="macro-current">242g</span>
+                      <span class="macro-current-label">eaten</span>
+                    </div>
+                    <div class="macro-range-limits">
+                      <div class="range-limit-row">
+                        <span class="rl-label min-label">Min</span>
+                        <span class="rl-val">380g</span>
+                      </div>
+                      <div class="range-limit-row">
+                        <span class="rl-label max-label">Max</span>
+                        <span class="rl-val">440g</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="range-bar-wrap">
+                    <div class="range-bar-track">
+                      <div class="range-bar-zone carbs-zone" style="left:0%;width:55%"></div>
+                      <div class="range-min-marker carbs-min" style="left:77%"></div>
+                      <div class="range-max-marker" style="left:90%"></div>
+                      <div class="range-fill-dot carbs-dot" style="left:55%"></div>
+                    </div>
+                    <div class="range-bar-labels">
+                      <span>0g</span><span style="margin-left:auto">440g</span>
+                    </div>
+                  </div>
+                  <div class="macro-status-row">
+                    <span class="macro-status-chip warn">⚠ 138g below minimum</span>
+                    <span class="macro-ratio">4.4g/kg bodyweight</span>
+                  </div>
+                  <p class="macro-tip">Add rice, oats or fruit at dinner to hit your carb floor.</p>
+                </div>
+
+                <!-- FATS -->
+                <div class="macro-block fats-block">
+                  <div class="macro-block-header">
+                    <span class="macro-block-icon">🥑</span>
+                    <span class="macro-block-name">Healthy Fats</span>
+                  </div>
+                  <div class="macro-range-display">
+                    <div class="macro-range-current">
+                      <span class="macro-current">56g</span>
+                      <span class="macro-current-label">eaten</span>
+                    </div>
+                    <div class="macro-range-limits">
+                      <div class="range-limit-row">
+                        <span class="rl-label min-label">Min</span>
+                        <span class="rl-val">50g</span>
+                      </div>
+                      <div class="range-limit-row">
+                        <span class="rl-label max-label">Max</span>
+                        <span class="rl-val">70g</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="range-bar-wrap">
+                    <div class="range-bar-track">
+                      <div class="range-bar-zone fats-zone" style="left:0%;width:80%"></div>
+                      <div class="range-min-marker fats-min" style="left:71%"></div>
+                      <div class="range-max-marker" style="left:100%"></div>
+                      <div class="range-fill-dot fats-dot" style="left:80%"></div>
+                    </div>
+                    <div class="range-bar-labels">
+                      <span>0g</span><span style="margin-left:auto">70g</span>
+                    </div>
+                  </div>
+                  <div class="macro-status-row">
+                    <span class="macro-status-chip good">✓ Within target range</span>
+                    <span class="macro-ratio">0.7g/kg bodyweight</span>
+                  </div>
+                  <p class="macro-tip">Supports hormones and joint health — stay in range.</p>
+                </div>
+
+                <!-- FIBER -->
+                <div class="macro-block fiber-block">
+                  <div class="macro-block-header">
+                    <span class="macro-block-icon">🥦</span>
+                    <span class="macro-block-name">Fiber</span>
+                  </div>
+                  <div class="macro-range-display">
+                    <div class="macro-range-current">
+                      <span class="macro-current">18g</span>
+                      <span class="macro-current-label">eaten</span>
+                    </div>
+                    <div class="macro-range-limits">
+                      <div class="range-limit-row"><span class="rl-label min-label">Min</span><span class="rl-val">25g</span></div>
+                      <div class="range-limit-row"><span class="rl-label max-label">Max</span><span class="rl-val">40g</span></div>
+                    </div>
+                  </div>
+                  <div class="range-bar-wrap">
+                    <div class="range-bar-track">
+                      <div class="range-bar-zone fiber-zone" style="left:0%;width:45%"></div>
+                      <div class="range-min-marker fiber-min" style="left:62%"></div>
+                      <div class="range-max-marker" style="left:100%"></div>
+                      <div class="range-fill-dot fiber-dot" style="left:45%"></div>
+                    </div>
+                    <div class="range-bar-labels"><span>0g</span><span style="margin-left:auto">40g</span></div>
+                  </div>
+                  <div class="macro-status-row">
+                    <span class="macro-status-chip warn">⚠ 7g below minimum</span>
+                    <span class="macro-ratio">gut health essential</span>
+                  </div>
+                  <p class="macro-tip">Add legumes, veggies, or a fiber supplement at dinner.</p>
+                </div>
+
+              </div>
+
+               <!-- Log Food Section -->
+              <div class="section-header">
+                <h2 class="section-title">Today's Log</h2>
+                <button class="see-all-btn add-food-btn" onclick="openFoodLog()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                  Add Food
+                </button>
+              </div>
+              <div id="logged-meals-list"></div>
+
+               <!-- Water Tracking -->
+              <div class="section-header" style="margin-top:8px">
+                <h2 class="section-title">Hydration</h2>
+                <span class="water-amount">0ml</span><span class="water-goal-text" style="color:var(--text-muted);font-size:12px;margin-left:4px">/2.9L</span>
+              </div>
+              <div class="water-card">
+                <div class="water-bar-track"><div class="water-bar-fill" id="water-bar-fill"></div></div>
+                <div class="water-btn-row">
+                  <button class="water-btn" onclick="addWater(250)">+250ml</button>
+                  <button class="water-btn" onclick="addWater(500)">+500ml</button>
+                  <button class="water-btn" onclick="addWater(750)">+750ml</button>
+                  <button class="water-btn water-btn-neg" onclick="addWater(-250)">−</button>
+                </div>
+              </div>
+
+              <!-- Micronutrients -->
+              <div class="section-header" style="margin-top:4px">
+                <h2 class="section-title">Micronutrients</h2>
+                <span class="tag purple small">Today</span>
+              </div>
+              <div class="micro-card" id="micro-card">
+                <p class="micro-intro">Track 8 key vitamins &amp; minerals from your logged foods.</p>
+                <div id="micronutrient-list"></div>
+              </div>
+
+               <!-- Meal List -->
+              <div class="section-header"><h2 class="section-title">Meal Plan</h2></div>
+
+              <div class="meal-list">
+                <div class="meal-card logged">
+                  <div class="meal-time-badge">7:30 AM</div>
+                  <div class="meal-info">
+                    <div class="meal-header"><h4 class="meal-name">Breakfast</h4><span class="meal-kcal logged-kcal">620 kcal ✓</span></div>
+                    <p class="meal-items">Oats 80g · Whey protein 40g · Banana · Peanut butter 20g</p>
+                    <div class="meal-macros-mini"><span class="mmacro p">P: 45g</span><span class="mmacro c">C: 78g</span><span class="mmacro f">F: 12g</span></div>
+                  </div>
+                </div>
+                <div class="meal-card logged">
+                  <div class="meal-time-badge">12:00 PM</div>
+                  <div class="meal-info">
+                    <div class="meal-header"><h4 class="meal-name">Lunch</h4><span class="meal-kcal logged-kcal">840 kcal ✓</span></div>
+                    <p class="meal-items">Chicken breast 200g · White rice 200g · Broccoli 150g · Olive oil</p>
+                    <div class="meal-macros-mini"><span class="mmacro p">P: 58g</span><span class="mmacro c">C: 95g</span><span class="mmacro f">F: 18g</span></div>
+                  </div>
+                </div>
+                <div class="meal-card upcoming">
+                  <div class="meal-time-badge upcoming-badge">4:00 PM</div>
+                  <div class="meal-info">
+                    <div class="meal-header"><h4 class="meal-name">Pre-Workout</h4><span class="meal-kcal">380 kcal</span></div>
+                    <p class="meal-items">Greek yogurt 200g · Granola 50g · Honey · Berries</p>
+                    <div class="meal-macros-mini"><span class="mmacro p">P: 28g</span><span class="mmacro c">C: 52g</span><span class="mmacro f">F: 6g</span></div>
+                  </div>
+                </div>
+                <div class="meal-card upcoming">
+                  <div class="meal-time-badge upcoming-badge">8:00 PM</div>
+                  <div class="meal-info">
+                    <div class="meal-header"><h4 class="meal-name">Post-Workout Dinner</h4><span class="meal-kcal">1,000 kcal</span></div>
+                    <p class="meal-items">Salmon 200g · Sweet potato 300g · Asparagus · Avocado 80g</p>
+                    <div class="meal-macros-mini"><span class="mmacro p">P: 55g</span><span class="mmacro c">C: 110g</span><span class="mmacro f">F: 28g</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="height:100px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               SCREEN — AI COACH
+          ============================================================ -->
+          <div class="screen" id="screen-ai">
+            <div class="scroll-area">
+              <div class="ai-screen-header">
+                <div class="ai-orb"><div class="ai-orb-inner"></div></div>
+                <div>
+                  <h1 class="ai-coach-title">FitForge AI</h1>
+                  <p class="ai-coach-sub">Your personalized training intelligence</p>
+                </div>
+              </div>
+              <div class="ai-insights-grid">
+                <div class="ai-insight-card" style="--accent:#A78BFA"><span class="insight-icon">📈</span><div><p class="insight-label">Volume Load</p><p class="insight-val">+12% <span class="trend up">↑ this week</span></p></div></div>
+                <div class="ai-insight-card" style="--accent:#F59E0B"><span class="insight-icon">💤</span><div><p class="insight-label">Recovery</p><p class="insight-val">Good <span class="trend">7.2h</span></p></div></div>
+                <div class="ai-insight-card" style="--accent:#34D399"><span class="insight-icon">⚖️</span><div><p class="insight-label">Body Weight</p><p class="insight-val">82.4 kg <span class="trend up">↑ 0.3</span></p></div></div>
+                <div class="ai-insight-card" style="--accent:#F87171"><span class="insight-icon">🫀</span><div><p class="insight-label">Avg HRV</p><p class="insight-val">68 ms <span class="trend down">↓ watch</span></p></div></div>
+              </div>
+              <div class="section-header"><h2 class="section-title">Today's Insights</h2></div>
+              <div class="ai-rec-list">
+                <div class="ai-rec-card"><div class="ai-rec-icon" style="background:linear-gradient(135deg,#A78BFA,#7C3AED)">💪</div><div class="ai-rec-content"><h4 class="ai-rec-title">Progressive Overload Ready</h4><p class="ai-rec-body">You hit all reps at 75kg bench for 3 sessions. Time to move to 80kg on Set 3. Expected adaptation in 2–3 sessions.</p></div></div>
+                <div class="ai-rec-card"><div class="ai-rec-icon" style="background:linear-gradient(135deg,#F59E0B,#D97706)">🍖</div><div class="ai-rec-content"><h4 class="ai-rec-title">Protein Gap Alert</h4><p class="ai-rec-body">You're 22g short of your <strong>minimum 180g</strong>. Have a shake or Greek yogurt within 30 min post-workout.</p></div></div>
+                <div class="ai-rec-card"><div class="ai-rec-icon" style="background:linear-gradient(135deg,#34D399,#059669)">😴</div><div class="ai-rec-content"><h4 class="ai-rec-title">Sleep & Recovery</h4><p class="ai-rec-body">HRV dipped slightly. Consider active recovery tomorrow — light walk, stretching.</p></div></div>
+                <div class="ai-rec-card"><div class="ai-rec-icon" style="background:linear-gradient(135deg,#60A5FA,#2563EB)">🎯</div><div class="ai-rec-content"><h4 class="ai-rec-title">Training Style: Hypertrophy</h4><p class="ai-rec-body">Optimal: 6–12 reps, 3–4 sets, 60–180s rest, RPE 7–9. Your plan is on-target.</p></div></div>
+              </div>
+              <div class="section-header"><h2 class="section-title">Ask Your Coach</h2></div>
+              <div class="chat-window">
+                <div class="chat-bubble ai-bubble"><p>Hey Alex! 14-day streak 🔥 What do you want to work on today?</p></div>
+                <div class="chat-bubble user-bubble"><p>Should I increase weight on squats this week?</p></div>
+                <div class="chat-bubble ai-bubble"><p>Based on last 3 leg sessions — 4×8 at 100kg, RPE 7. <strong>Yes — move to 105kg</strong> for working sets. Keep 2 warm-ups at 80kg first.</p></div>
+              </div>
+              <div class="chat-input-row">
+                <input class="chat-input" type="text" placeholder="Ask anything about training..." id="chat-input-field" />
+                <button class="chat-send-btn" onclick="sendChatMessage()"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+              </div>
+              <div style="height:100px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               SCREEN — PROGRESS
+          ============================================================ -->
+          <div class="screen" id="screen-progress">
+            <div class="scroll-area">
+              <div class="screen-topbar">
+                <h1 class="screen-title">My Progress</h1>
+                <div class="topbar-tags">
+                  <button class="see-all-btn add-food-btn" onclick="openWeightModal()" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.2);color:var(--accent-purple)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    + Weight
+                  </button>
+                </div>
+              </div>
+              <div class="body-stats-grid">
+                <div class="body-stat-card"><p class="bstat-label">Body Weight</p><p class="bstat-val">82 <span class="bstat-unit">kg</span></p><p class="bstat-delta">Tap + to log</p></div>
+                <div class="body-stat-card"><p class="bstat-label">Body Fat</p><p class="bstat-val">15 <span class="bstat-unit">%</span></p><p class="bstat-delta">From onboarding</p></div>
+                <div class="body-stat-card"><p class="bstat-label">Lean Mass</p><p class="bstat-val">69.7 <span class="bstat-unit">kg</span></p><p class="bstat-delta">Estimated</p></div>
+                <div class="body-stat-card"><p class="bstat-label">BMI</p><p class="bstat-val">26.8</p><p class="bstat-delta">Normal–High</p></div>
+              </div>
+              <!-- Weight Chart -->
+              <div class="section-header" style="margin-top:4px">
+                <h2 class="section-title">Weight Trend</h2>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <span id="stat-sessions" style="font-size:12px;font-weight:700;color:var(--accent-purple)">0</span>
+                  <span style="font-size:11px;color:var(--text-muted)">sessions</span>
+                  <span id="stat-volume" style="font-size:12px;font-weight:700;color:var(--accent-orange)">0</span>
+                  <span style="font-size:11px;color:var(--text-muted)">total vol</span>
+                </div>
+              </div>
+              <div class="weight-chart-card">
+                <canvas id="weight-chart" style="width:100%;height:140px;display:block"></canvas>
+              </div>
+
+              <div class="section-header"><h2 class="section-title">Personal Records</h2></div>
+              <div class="pr-list">
+                <div class="pr-card"><div class="pr-exercise">🏋️ Bench Press</div><div class="pr-details"><span class="pr-weight">100 kg</span><span class="pr-reps">× 1</span></div><span class="pr-date">2 weeks ago</span></div>
+                <div class="pr-card"><div class="pr-exercise">🦵 Squat</div><div class="pr-details"><span class="pr-weight">140 kg</span><span class="pr-reps">× 1</span></div><span class="pr-date">Last month</span></div>
+                <div class="pr-card"><div class="pr-exercise">🔩 Deadlift</div><div class="pr-details"><span class="pr-weight">180 kg</span><span class="pr-reps">× 1</span></div><span class="pr-date">3 months ago</span></div>
+                <div class="pr-card"><div class="pr-exercise">🤸 OHP</div><div class="pr-details"><span class="pr-weight">65 kg</span><span class="pr-reps">× 1</span></div><span class="pr-date">Last month</span></div>
+              </div>
+              <div class="section-header"><h2 class="section-title">Activity Heatmap</h2></div>
+              <div class="activity-heatmap">
+                <div class="heatmap-grid" id="heatmap-grid"></div>
+                <div class="heatmap-legend"><span>Less</span><div class="legend-dots"><div class="ldot" style="opacity:0.15"></div><div class="ldot" style="opacity:0.35"></div><div class="ldot" style="opacity:0.6"></div><div class="ldot" style="opacity:0.85"></div><div class="ldot" style="opacity:1"></div></div><span>More</span></div>
+              </div>
+              <div style="height:100px"></div>
+            </div>
+          </div>
+
+          <!-- ============================================================
+               SCREEN — LEARN (Nutrients)
+          ============================================================ -->
+          <div class="screen" id="screen-learn">
+            <div class="scroll-area">
+
+              <!-- Header -->
+              <div class="learn-header">
+                <h1 class="screen-title">Nutrition Science</h1>
+                <p class="learn-sub">What you eat and why it matters.</p>
+              </div>
+
+              <!-- Category tabs -->
+              <div class="learn-tabs">
+                <button class="learn-tab active" id="ltab-macro" onclick="switchLearnTab('macro', this)">Macronutrients</button>
+                <button class="learn-tab" id="ltab-micro" onclick="switchLearnTab('micro', this)">Micronutrients</button>
+              </div>
+
+              <!-- ── MACRO PANEL ── -->
+              <div class="learn-panel" id="lpanel-macro">
+
+                <!-- Protein -->
+                <div class="nutrient-card" id="nc-protein">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-protein')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#A78BFA,#7C3AED)">🥩</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Protein</h3>
+                      <span class="nutrient-cal-badge">4 kcal / gram</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body">
+                    <div class="nutrient-why-row">
+                      <div class="why-chip">🏗️ Builds muscle</div>
+                      <div class="why-chip">🔧 Repairs tissue</div>
+                      <div class="why-chip">⚗️ Makes enzymes</div>
+                      <div class="why-chip">💊 Supports immunity</div>
+                    </div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item">
+                        <p class="nd-label">Athlete target</p>
+                        <p class="nd-val">1.6 – 2.2 g/kg bodyweight</p>
+                      </div>
+                      <div class="nd-item">
+                        <p class="nd-label">Timing</p>
+                        <p class="nd-val">Spread across 4+ meals. 30–40g per sitting max.</p>
+                      </div>
+                      <div class="nd-item">
+                        <p class="nd-label">Deficiency signs</p>
+                        <p class="nd-val">Muscle loss, slow recovery, fatigue, hair loss</p>
+                      </div>
+                    </div>
+                    <div class="sources-section">
+                      <p class="sources-title">Best sources</p>
+                      <div class="sources-grid">
+                        <div class="source-chip" style="--sc:#A78BFA">Chicken breast<span>31g/100g</span></div>
+                        <div class="source-chip" style="--sc:#A78BFA">Whey protein<span>25g/30g</span></div>
+                        <div class="source-chip" style="--sc:#A78BFA">Eggs<span>6g each</span></div>
+                        <div class="source-chip" style="--sc:#A78BFA">Greek yogurt<span>17g/200g</span></div>
+                        <div class="source-chip" style="--sc:#A78BFA">Tuna<span>30g/100g</span></div>
+                        <div class="source-chip" style="--sc:#A78BFA">Lentils<span>9g/100g</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Carbohydrates -->
+                <div class="nutrient-card" id="nc-carbs">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-carbs')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#F59E0B,#D97706)">🍚</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Carbohydrates</h3>
+                      <span class="nutrient-cal-badge">4 kcal / gram</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="carb-types">
+                      <div class="carb-type-row">
+                        <div class="carb-type-dot" style="background:#34D399"></div>
+                        <div><p class="ct-name">Complex carbs</p><p class="ct-desc">Slow-digesting. Oats, rice, sweet potato — sustained energy for training.</p></div>
+                      </div>
+                      <div class="carb-type-row">
+                        <div class="carb-type-dot" style="background:#F59E0B"></div>
+                        <div><p class="ct-name">Simple sugars</p><p class="ct-desc">Fast energy. Fruit, honey, dextrose — ideal immediately post-workout.</p></div>
+                      </div>
+                      <div class="carb-type-row">
+                        <div class="carb-type-dot" style="background:#60A5FA"></div>
+                        <div><p class="ct-name">Dietary fiber</p><p class="ct-desc">Non-digestible. Feeds gut bacteria, slows sugar absorption, keeps you full.</p></div>
+                      </div>
+                    </div>
+                    <div class="nutrient-why-row" style="margin-top:12px">
+                      <div class="why-chip">⚡ Primary fuel</div>
+                      <div class="why-chip">🧠 Brain function</div>
+                      <div class="why-chip">💾 Glycogen storage</div>
+                      <div class="why-chip">😴 Recovery</div>
+                    </div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item">
+                        <p class="nd-label">Athlete target</p>
+                        <p class="nd-val">4 – 7 g/kg (training days), 3 – 5 g/kg (rest days)</p>
+                      </div>
+                      <div class="nd-item">
+                        <p class="nd-label">Timing matters</p>
+                        <p class="nd-val">Complex 2h pre-workout. Simple + protein within 30 min post-workout.</p>
+                      </div>
+                    </div>
+                    <div class="sources-section">
+                      <p class="sources-title">Best sources</p>
+                      <div class="sources-grid">
+                        <div class="source-chip" style="--sc:#F59E0B">White rice<span>80g/100g</span></div>
+                        <div class="source-chip" style="--sc:#F59E0B">Oats<span>66g/100g</span></div>
+                        <div class="source-chip" style="--sc:#F59E0B">Sweet potato<span>20g/100g</span></div>
+                        <div class="source-chip" style="--sc:#F59E0B">Banana<span>23g each</span></div>
+                        <div class="source-chip" style="--sc:#F59E0B">Sourdough<span>50g/100g</span></div>
+                        <div class="source-chip" style="--sc:#F59E0B">Dates<span>75g/100g</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fats -->
+                <div class="nutrient-card" id="nc-fats">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-fats')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#34D399,#059669)">🥑</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Dietary Fats</h3>
+                      <span class="nutrient-cal-badge">9 kcal / gram</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row">
+                      <div class="why-chip">🧬 Testosterone</div>
+                      <div class="why-chip">🦴 Joint health</div>
+                      <div class="why-chip">🧠 Brain function</div>
+                      <div class="why-chip">💊 Fat-soluble vitamins</div>
+                    </div>
+                    <div class="fat-types">
+                      <div class="fat-type-item">
+                        <span class="fat-type-badge good">✓ Eat more</span>
+                        <p class="ft-name">Unsaturated (Omega-3, Omega-6)</p>
+                        <p class="ft-desc">Avocado, olive oil, fatty fish, nuts, seeds. Anti-inflammatory, heart-protective.</p>
+                      </div>
+                      <div class="fat-type-item">
+                        <span class="fat-type-badge moderate">~ Moderate</span>
+                        <p class="ft-name">Saturated fat</p>
+                        <p class="ft-desc">Red meat, dairy, coconut oil. Supports testosterone production — keep under 10% of cals.</p>
+                      </div>
+                      <div class="fat-type-item">
+                        <span class="fat-type-badge avoid">✗ Avoid</span>
+                        <p class="ft-name">Trans fats</p>
+                        <p class="ft-desc">Processed foods, fast food. Raises LDL, lowers HDL. No safe amount.</p>
+                      </div>
+                    </div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item">
+                        <p class="nd-label">Athlete target</p>
+                        <p class="nd-val">0.7 – 1.0 g/kg bodyweight</p>
+                      </div>
+                      <div class="nd-item">
+                        <p class="nd-label">Never go below</p>
+                        <p class="nd-val">20% of total calories — hormones suffer below this</p>
+                      </div>
+                    </div>
+                    <div class="sources-section">
+                      <p class="sources-title">Best sources</p>
+                      <div class="sources-grid">
+                        <div class="source-chip" style="--sc:#34D399">Avocado<span>15g each</span></div>
+                        <div class="source-chip" style="--sc:#34D399">Salmon<span>13g/100g</span></div>
+                        <div class="source-chip" style="--sc:#34D399">Olive oil<span>14g/tbsp</span></div>
+                        <div class="source-chip" style="--sc:#34D399">Almonds<span>15g/30g</span></div>
+                        <div class="source-chip" style="--sc:#34D399">Egg yolks<span>5g each</span></div>
+                        <div class="source-chip" style="--sc:#34D399">Chia seeds<span>9g/30g</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Water -->
+                <div class="nutrient-card" id="nc-water">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-water')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#60A5FA,#2563EB)">💧</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Water &amp; Hydration</h3>
+                      <span class="nutrient-cal-badge">0 kcal / gram</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row">
+                      <div class="why-chip">💪 Strength output</div>
+                      <div class="why-chip">🌡️ Temperature</div>
+                      <div class="why-chip">🔄 Nutrient transport</div>
+                      <div class="why-chip">🧠 Focus</div>
+                    </div>
+                    <div class="water-fact-box">
+                      <p class="wfact">A <strong>2% drop in body water</strong> reduces strength by up to 10% and endurance by 20%.</p>
+                    </div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item">
+                        <p class="nd-label">Daily baseline</p>
+                        <p class="nd-val">35 ml × bodyweight in kg. (82kg = 2.87L minimum)</p>
+                      </div>
+                      <div class="nd-item">
+                        <p class="nd-label">Training days</p>
+                        <p class="nd-val">Add 500–750 ml per hour of training. Sip electrolytes.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div><!-- end macro panel -->
+
+              <!-- ── MICRO PANEL ── -->
+              <div class="learn-panel collapsed" id="lpanel-micro">
+
+                <div class="micro-intro">
+                  <p>Micronutrients don't provide energy but are essential for every metabolic process — especially for athletes training hard.</p>
+                </div>
+
+                <!-- Vitamin D -->
+                <div class="nutrient-card" id="nc-vitd">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-vitd')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#FCD34D,#F59E0B)">☀️</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Vitamin D</h3>
+                      <span class="nutrient-type-badge">Fat-soluble vitamin</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row"><div class="why-chip">🦴 Bone density</div><div class="why-chip">💪 Muscle function</div><div class="why-chip">🛡️ Immunity</div><div class="why-chip">😊 Mood &amp; sleep</div></div>
+                    <div class="deficiency-alert">⚠ Over <strong>40% of athletes</strong> are deficient — especially those who train indoors.</div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item"><p class="nd-label">Target</p><p class="nd-val">2,000–4,000 IU/day (test blood levels first)</p></div>
+                      <div class="nd-item"><p class="nd-label">Deficiency signs</p><p class="nd-val">Bone pain, fatigue, muscle weakness, low mood</p></div>
+                    </div>
+                    <div class="sources-section"><p class="sources-title">Sources</p><div class="sources-grid">
+                      <div class="source-chip" style="--sc:#F59E0B">Sunlight<span>main source</span></div>
+                      <div class="source-chip" style="--sc:#F59E0B">Salmon<span>600 IU/100g</span></div>
+                      <div class="source-chip" style="--sc:#F59E0B">Egg yolks<span>40 IU each</span></div>
+                      <div class="source-chip" style="--sc:#F59E0B">Supplement<span>D3 form</span></div>
+                    </div></div>
+                  </div>
+                </div>
+
+                <!-- Magnesium -->
+                <div class="nutrient-card" id="nc-mag">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-mag')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#34D399,#059669)">⚡</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Magnesium</h3>
+                      <span class="nutrient-type-badge">Essential mineral</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row"><div class="why-chip">⚡ ATP production</div><div class="why-chip">💪 Muscle contraction</div><div class="why-chip">😴 Sleep quality</div><div class="why-chip">🧬 300+ enzymes</div></div>
+                    <div class="deficiency-alert">⚠ Athletes lose magnesium in sweat. Up to <strong>70% are deficient</strong> without supplementation.</div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item"><p class="nd-label">Target</p><p class="nd-val">400–600 mg/day for athletes</p></div>
+                      <div class="nd-item"><p class="nd-label">Deficiency signs</p><p class="nd-val">Muscle cramps, poor sleep, anxiety, constipation</p></div>
+                    </div>
+                    <div class="sources-section"><p class="sources-title">Sources</p><div class="sources-grid">
+                      <div class="source-chip" style="--sc:#34D399">Pumpkin seeds<span>150mg/30g</span></div>
+                      <div class="source-chip" style="--sc:#34D399">Dark chocolate<span>64mg/30g</span></div>
+                      <div class="source-chip" style="--sc:#34D399">Spinach<span>78mg/100g</span></div>
+                      <div class="source-chip" style="--sc:#34D399">Almonds<span>76mg/30g</span></div>
+                    </div></div>
+                  </div>
+                </div>
+
+                <!-- Iron -->
+                <div class="nutrient-card" id="nc-iron">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-iron')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#F87171,#DC2626)">🩸</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Iron</h3>
+                      <span class="nutrient-type-badge">Essential mineral</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row"><div class="why-chip">🫀 Oxygen transport</div><div class="why-chip">⚡ Energy levels</div><div class="why-chip">💪 Endurance</div><div class="why-chip">🧠 Focus</div></div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item"><p class="nd-label">Target</p><p class="nd-val">Men: 8 mg/day · Women: 18 mg/day · Athletes: higher</p></div>
+                      <div class="nd-item"><p class="nd-label">Deficiency signs</p><p class="nd-val">Fatigue, pale skin, breathlessness, poor performance</p></div>
+                    </div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item" style="border-left: 3px solid var(--accent-green); padding-left: 8px">
+                        <p class="nd-label">✓ Heme iron (better absorbed)</p>
+                        <p class="nd-val">Red meat, liver, chicken, fish — 15–35% absorption</p>
+                      </div>
+                      <div class="nd-item" style="border-left: 3px solid var(--accent-orange); padding-left: 8px">
+                        <p class="nd-label">○ Non-heme iron</p>
+                        <p class="nd-val">Legumes, spinach, tofu — 2–20% absorption. Pair with Vitamin C to boost.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zinc -->
+                <div class="nutrient-card" id="nc-zinc">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-zinc')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#A78BFA,#5B21B6)">🧬</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Zinc</h3>
+                      <span class="nutrient-type-badge">Essential mineral</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row"><div class="why-chip">🦾 Testosterone</div><div class="why-chip">🏃 Recovery</div><div class="why-chip">🛡️ Immunity</div><div class="why-chip">🧬 Protein synthesis</div></div>
+                    <div class="deficiency-alert">⚠ Intense training depletes zinc through sweat. Low zinc = lower testosterone.</div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item"><p class="nd-label">Target</p><p class="nd-val">Men: 11 mg/day · Women: 8 mg/day</p></div>
+                      <div class="nd-item"><p class="nd-label">Deficiency signs</p><p class="nd-val">Slow recovery, frequent illness, low libido, poor sleep</p></div>
+                    </div>
+                    <div class="sources-section"><p class="sources-title">Sources</p><div class="sources-grid">
+                      <div class="source-chip" style="--sc:#A78BFA">Oysters<span>74mg/100g</span></div>
+                      <div class="source-chip" style="--sc:#A78BFA">Beef<span>4.8mg/100g</span></div>
+                      <div class="source-chip" style="--sc:#A78BFA">Pumpkin seeds<span>2.2mg/30g</span></div>
+                      <div class="source-chip" style="--sc:#A78BFA">Cashews<span>1.6mg/30g</span></div>
+                    </div></div>
+                  </div>
+                </div>
+
+                <!-- Vitamin C -->
+                <div class="nutrient-card" id="nc-vitc">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-vitc')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#FB923C,#EA580C)">🍊</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Vitamin C</h3>
+                      <span class="nutrient-type-badge">Water-soluble vitamin</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row"><div class="why-chip">🛡️ Immunity</div><div class="why-chip">🦴 Collagen synthesis</div><div class="why-chip">⚗️ Antioxidant</div><div class="why-chip">🩸 Iron absorption</div></div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item"><p class="nd-label">Target</p><p class="nd-val">200–1000 mg/day for athletes (water-soluble — excess is excreted)</p></div>
+                      <div class="nd-item"><p class="nd-label">Deficiency signs</p><p class="nd-val">Slow wound healing, joint pain, frequent illness, gum bleeding</p></div>
+                    </div>
+                    <div class="sources-section"><p class="sources-title">Sources</p><div class="sources-grid">
+                      <div class="source-chip" style="--sc:#FB923C">Bell pepper<span>128mg/100g</span></div>
+                      <div class="source-chip" style="--sc:#FB923C">Kiwi<span>93mg each</span></div>
+                      <div class="source-chip" style="--sc:#FB923C">Broccoli<span>89mg/100g</span></div>
+                      <div class="source-chip" style="--sc:#FB923C">Strawberries<span>59mg/100g</span></div>
+                    </div></div>
+                  </div>
+                </div>
+
+                <!-- B Vitamins -->
+                <div class="nutrient-card" id="nc-vitb">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-vitb')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#F472B6,#BE185D)">⚡</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">B-Vitamin Complex</h3>
+                      <span class="nutrient-type-badge">Water-soluble vitamins</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="b-vitamin-list">
+                      <div class="bvit-row"><span class="bvit-label">B1 (Thiamine)</span><span class="bvit-role">Converts carbs to energy. Nerve function.</span></div>
+                      <div class="bvit-row"><span class="bvit-label">B2 (Riboflavin)</span><span class="bvit-role">Cellular energy production. Metabolizes fats + protein.</span></div>
+                      <div class="bvit-row"><span class="bvit-label">B3 (Niacin)</span><span class="bvit-role">NAD+ production. DNA repair. Fat metabolism.</span></div>
+                      <div class="bvit-row"><span class="bvit-label">B6 (Pyridoxine)</span><span class="bvit-role">Protein metabolism. Makes neurotransmitters.</span></div>
+                      <div class="bvit-row"><span class="bvit-label">B9 (Folate)</span><span class="bvit-role">Red blood cell production. DNA synthesis.</span></div>
+                      <div class="bvit-row bvit-highlight"><span class="bvit-label">B12 (Cobalamin)</span><span class="bvit-role">Nerve health. Red blood cells. Energy. <strong>Vegans must supplement.</strong></span></div>
+                    </div>
+                    <div class="sources-section" style="margin-top:12px"><p class="sources-title">Best B-vitamin foods</p><div class="sources-grid">
+                      <div class="source-chip" style="--sc:#F472B6">Beef liver<span>B12 king</span></div>
+                      <div class="source-chip" style="--sc:#F472B6">Eggs<span>B2, B12</span></div>
+                      <div class="source-chip" style="--sc:#F472B6">Chicken<span>B3, B6</span></div>
+                      <div class="source-chip" style="--sc:#F472B6">Nutritional yeast<span>all B's</span></div>
+                    </div></div>
+                  </div>
+                </div>
+
+                <!-- Omega-3 -->
+                <div class="nutrient-card" id="nc-omega">
+                  <div class="nutrient-card-header" onclick="toggleNutrient('nc-omega')">
+                    <div class="nutrient-icon" style="background:linear-gradient(135deg,#22D3EE,#0891B2)">🐟</div>
+                    <div class="nutrient-title-block">
+                      <h3 class="nutrient-name">Omega-3 Fatty Acids</h3>
+                      <span class="nutrient-type-badge">Essential fatty acid</span>
+                    </div>
+                    <svg class="nutrient-chevron" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                  </div>
+                  <div class="nutrient-body collapsed">
+                    <div class="nutrient-why-row"><div class="why-chip">🔥 Anti-inflammatory</div><div class="why-chip">🧠 Brain &amp; focus</div><div class="why-chip">❤️ Heart health</div><div class="why-chip">💪 Muscle protein synthesis</div></div>
+                    <div class="nutrient-detail-grid">
+                      <div class="nd-item"><p class="nd-label">Key forms</p><p class="nd-val">EPA + DHA (fish) — most bioavailable. ALA (plant) — less effective.</p></div>
+                      <div class="nd-item"><p class="nd-label">Target</p><p class="nd-val">2–3g EPA+DHA daily for athletes. Take with meals containing fat.</p></div>
+                    </div>
+                    <div class="sources-section"><p class="sources-title">Sources</p><div class="sources-grid">
+                      <div class="source-chip" style="--sc:#22D3EE">Salmon<span>2.2g/100g</span></div>
+                      <div class="source-chip" style="--sc:#22D3EE">Mackerel<span>2.6g/100g</span></div>
+                      <div class="source-chip" style="--sc:#22D3EE">Sardines<span>1.5g/100g</span></div>
+                      <div class="source-chip" style="--sc:#22D3EE">Fish oil caps<span>supplement</span></div>
+                    </div></div>
+                  </div>
+                </div>
+
+              </div><!-- end micro panel -->
+
+              <div style="height:100px"></div>
+            </div>
+          </div><!-- end screen-learn -->
+
+        </div><!-- END screen-router -->
+
+        <!-- BOTTOM NAV (hidden on onboarding/login) -->
+        <nav class="bottom-nav" id="bottom-nav" style="display:none" role="navigation" aria-label="Main navigation">
+          <button class="nav-btn active" id="nav-home" onclick="switchScreen('screen-home', this)" aria-label="Home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></button>
+          <button class="nav-btn" id="nav-training" onclick="switchScreen('screen-training', this)" aria-label="Train"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg><span>Train</span></button>
+          <button class="nav-btn" id="nav-nutrition" onclick="switchScreen('screen-nutrition', this)" aria-label="Nutrition"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8-15.03-8-15.03 0h15.03zM1.02 17h15v2h-15z"/></svg><span>Nutrition</span></button>
+          <button class="nav-btn" id="nav-ai" onclick="switchScreen('screen-ai', this)" aria-label="AI Coach"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg><span>Coach</span></button>
+          <button class="nav-btn" id="nav-learn" onclick="switchScreen('screen-learn', this)" aria-label="Learn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg><span>Learn</span></button>
+          <button class="nav-btn" id="nav-progress" onclick="switchScreen('screen-progress', this)" aria-label="Progress"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg><span>Progress</span></button>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
